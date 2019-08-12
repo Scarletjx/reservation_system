@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<html>
+<head>
+     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+</head>
+<body>
+
+<script type="text/javascript">
+$(document).ready(function () {
+    $('#checkBtn').click(function() {
+      checked = $("input[type=checkbox]:checked").length;
+
+      if(!checked) {
+        alert("You must check at least one checkbox.");
+        return false;
+      }
+
+    });
+});
+</script>
+
+<div id="booking" class="section">
+    <div class="section-center">
+        <div class="container">
+            <div class="row">
+                <div class="booking-form">
+                    <div class="form-header">
+                        <h1>Cancel Booking</h1>
+                        <br>
+                    </div>
+                    <form action="{{ url_for('cancel_booking')}}" method=post>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    {% if email is not defined %}
+                                        <input class="form-control" type="text" placeholder="Enter your email" name="email">
+                                </div>
+                            </div>
+                        </div>
+                            <div class="form-btn">
+                                <button class="submit-btn">Ok</button>
+                            </div>
+                                {% else %}
+                            <div class="form-group">
+                                {% for choice in choices %}
+                                        <input type="checkbox" name="cancel_choice" value="{{choice[0]}}">
+                                        {{choice}}<br>
+                                        <input type="hidden" name="choices" value="{{choice}}">
+                                {% endfor %}
+                            </div>
+                            <div class="form-btn">
+                                <button class="submit-btn" name="submit" value="Submit" id="checkBtn">Confirm</button>
+                            </div>
+                                {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+{% endblock %}

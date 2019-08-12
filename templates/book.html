@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div id="booking" class="section">
+    <div class="section-center">
+        <div class="container">
+            <div class="row">
+                <div class="booking-form">
+                    <div class="form-header">
+                        <h1>Book GPU</h1>
+                        <br>
+                    </div>
+
+                    <form action="" method="post">
+                        {% from "_formhelpers.html" import render_field %}
+
+                            <div class="form-group">
+                                <span class="form-label">Your Email</span>
+                                {{ form.email(class_="form-control") }}
+                                {{ form.hidden_tag() }}
+                                {% for error in form.email.errors %}
+                                <span style="color: red;">[{{ error }}]</span>
+                                {% endfor %}
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <span class="form-label">Start Date</span>
+                                        {{ form.startDate(class_="form-control", type="date") }}
+                                        {% for error in form.startDate.errors %}
+                                        <span style="color: red;">[{{ error }}]</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        {{ render_field(form.startTime) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        {{ render_field(form.duration) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        {{ render_field(form.node) }}
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        {{ render_field(form.GPU) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-btn">
+                                {{ form.submit(class_="submit-btn") }}
+                            </div>
+                        </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
