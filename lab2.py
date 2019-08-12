@@ -49,7 +49,8 @@ class GPUAvailabilityForm(Form):
     submit = SubmitField('Check')
 
 
-# Route
+# Routes
+# Navigation bar
 @app.route('/')
 @app.route('/base')
 def index():
@@ -64,7 +65,7 @@ def book():
     # validate the submission within the form
     if form.validate_on_submit():
         if form.startDate.data < datetime.datetime.now().date():
-            flash('You cannot make bookings in the past')
+            flash('You cannot make booking in the past')
             return redirect(url_for('book'))
         else:
             # constant
@@ -114,10 +115,10 @@ def book():
     if form_start_time < 10 and end_time < 10:
         start = str(form_start_date) + "T" + "0" + str(form_start_time) + ":00:00"
         end = str(end_date) + "T" + "0" + str(end_time) + ":00:00"
-    elif form_start_time < 10 and end_time > 10:
+    elif form_start_time < 10 < end_time:
         start = str(form_start_date) + "T" + "0" + str(form_start_time) + ":00:00"
         end = str(end_date) + "T" + str(end_time) + ":00:00"
-    elif form_start_time > 10 and end_time < 10:
+    elif form_start_time > 10 > end_time:
         start = str(form_start_date) + "T" + str(form_start_time) + ":00:00"
         end = str(end_date) + "T" + "0" + str(end_time) + ":00:00"
     else:
@@ -135,18 +136,24 @@ def book():
 @app.route('/cancel_booking', methods=['GET', 'POST'])
 def cancel_booking():
     if request.method == 'POST':
+        # get if checkbox is ticked
         values = request.form.getlist("cancel_choice")
-        if values != []:
+        # if any of the checkbox is ticked
+        if values is not []:
             for value in values:
+                # delete the ticked bookings from the database
                 BookingDetails.query.filter_by(id=int(value)).delete()
                 db.session.commit()
             flash('Booking Cancelled')
             return redirect(url_for('cancel_booking'))
+        # if no checkbox is ticked
         else:
+            # Ask user for their email
             email = str(request.form['email'])
             if email == "":
                 flash("Please enter your email")
                 return redirect(url_for('cancel_booking'))
+            # Filter all the bookings with the user's email
             bookings = BookingDetails.query.filter_by(email=email).all()
             choices = [(booking.id, 'GPU {} of Node {} started at {} from {}, to {} at {}'.format(booking.GPU,
                                                                                                   booking.node,
@@ -154,10 +161,12 @@ def cancel_booking():
                                                                                                   booking.startTime,
                                                                                                   booking.endDate,
                                                                                                   booking.endTime)) for booking in bookings]
+            # If no bookings are made under this email
             if not choices:
                 flash("You have no bookings available to cancel")
                 return redirect(url_for('cancel_booking'))
             return render_template("cancel_booking.html", email=email, choices=choices)
+    # If email is not entered
     else:
         if "email" not in request.form:
             return render_template("cancel_booking.html")
@@ -170,6 +179,7 @@ def gpu_availability():
     form = GPUAvailabilityForm()
     if request.method == 'POST':
         if form.node.data == 60:
+            # return calendar for node60
             return render_template('json1.html')
         elif form.node.data == 61:
             return render_template('json2.html')
@@ -209,6 +219,7 @@ def return_data_for_node_one():
     return jsonify(json_bookings)
 
 
+# Jquery data value passed to json.html
 @app.route('/data2')
 def return_data_for_node_two():
     json_bookings = []
