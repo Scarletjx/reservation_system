@@ -158,7 +158,7 @@ def cancel_booking():
         # get if checkbox is ticked
         values = request.form.getlist("cancel_choice")
         # if any of the checkbox is ticked
-        if values is not []:
+        if values:
             for value in values:
                 # delete the ticked bookings from the database
                 BookingDetails.query.filter_by(id=int(value)).delete()
