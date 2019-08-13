@@ -1,18 +1,31 @@
 from flask import Flask, render_template, flash, redirect, request, url_for, jsonify
 from flask_wtf import Form
 from wtforms.fields import StringField, SubmitField, DateField, SelectField
-from wtforms.validators import DataRequired, ValidationError, Email
+from wtforms.validators import DataRequired, Email
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_, or_
+from flask_mail import Message, Mail
 import datetime
+import re
 
+
+mail = Mail()
 
 app = Flask(__name__)
 
 app.secret_key = 'development key'
 
+app.config["MAIL_SERVER"] = "smtp.gmail.com"
+app.config["MAIL_PORT"] = 465
+app.config["MAIL_USE_SSL"] = True
+app.config["MAIL_USERNAME"] = 'scarlet.jx@gmail.com'
+app.config["MAIL_PASSWORD"] = 'jaibaoXIAO020516'
+
+mail.init_app(app)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///lab2.db'
 db = SQLAlchemy(app)
+
 
 
 # Database table
@@ -47,6 +60,12 @@ class BookingForm(Form):
 class GPUAvailabilityForm(Form):
     node = SelectField('Choose the Node to check', coerce=int, choices=[(60, 60), (61, 61), (63, 63)], render_kw={"class": "form-control"})
     submit = SubmitField('Check')
+
+
+class GPUWatcherForm(Form):
+    email = StringField(validators=[DataRequired(), Email("This field requires a valid email address")])
+    node = SelectField(coerce=int, choices=[(60, 60), (61, 61), (63, 63)], render_kw={"class": "form-control"})
+    submit = SubmitField('Send email')
 
 
 # Routes
@@ -278,6 +297,31 @@ def return_data_for_node_three():
             event['color'] = 'rgb(3, 252, 128)'
         json_bookings.append(event)
     return jsonify(json_bookings)
+
+
+@app.route('/gpu_watcher', methods=['GET', 'POST'])
+def gpu_watcher():
+    form = GPUWatcherForm()
+    if form.validate_on_submit():
+        node_file = open("Node{}.txt".format(form.node.data), "r")
+        message = ""
+        for gpu in node_file:
+            message = message + gpu
+
+        msg = Message('GPU Watcher', sender='contact@example.com', recipients=[form.email.data])
+        if message == "[]":
+            msg.body = """
+                     No GPUs are available for node %s
+                          """ % form.node.data
+        else:
+            msg.body = """
+                  The GPUs: %s for node %s are available
+                  """ % (message, form.node.data)
+        mail.send(msg)
+        flash('Email sent')
+        return redirect(url_for('gpu_watcher'))
+    else:
+        return render_template('gpu_watcher.html', title='GPU Watcher', form=form)
 
 
 if __name__ == '__main__':
